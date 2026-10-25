@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raja Bahasa - Permainan Interaktif Bahasa Melayu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans & Fredoka -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Fredoka', 'cursive'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        gold: {
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .font-display {
+            font-family: 'Fredoka', cursive;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .bounce-short {
+            animation: bounce 0.5s ease infinite alternate;
+        }
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-8px); }
+        }
+        .pulse-subtle {
+            animation: pulseSubtle 2s ease-in-out infinite;
+        }
+        @keyframes pulseSubtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #16a34a;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between relative overflow-x-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900 via-slate-900 to-black">
+
+    <!-- Canvas Confetti -->
+    <canvas id="confettiCanvas" class="pointer-events-none fixed inset-0 z-50"></canvas>
+
+    <!-- Header Navigation -->
+    <header class="w-full max-w-5xl mx-auto px-4 py-4 flex items-center justify-between z-10">
+        <div onclick="showView('mainMenu')" class="flex items-center gap-3 cursor-pointer group">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
+                <i class="fa-solid fa-crown text-2xl text-emerald-900"></i>
+            </div>
+            <div>
+                <h1 class="font-display text-2xl font-bold text-white tracking-wide leading-tight">RAJA BAHASA</h1>
+                <p class="text-xs text-emerald-300 font-medium">Kembara Bahasa Melayu</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <!-- XP / Score Badge -->
+            <div class="bg-slate-800/80 border border-emerald-500/30 rounded-full px-4 py-1.5 flex items-center gap-2 text-white shadow-inner">
+                <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+                <span id="playerXP" class="font-bold text-sm">0</span>
+                <span class="text-xs text-slate-400">XP</span>
+            </div>
+
+            <!-- Audio Toggle -->
+            <button id="audioBtn" onclick="toggleAudio()" class="w-10 h-10 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 flex items-center justify-center transition">
+                <i id="audioIcon" class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <!-- Glosari Button -->
+            <button onclick="openGlosari()" class="w-10 h-10 rounded-full bg-emerald-600/80 hover:bg-emerald-500 border border-emerald-400/40 text-white flex items-center justify-center transition shadow-lg shadow-emerald-900/40" title="Glosari & Kamus">
+                <i class="fa-solid fa-book"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="w-full max-w-4xl mx-auto px-4 py-4 flex-grow flex flex-col justify-center items-center z-10">
+
+        <!-- 1. MAIN MENU VIEW -->
+        <section id="mainMenu" class="w-full max-w-2xl text-center space-y-6 py-6 transition-all duration-300">
+            <div class="space-y-3">
+                <span class="inline-block px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold tracking-wider uppercase">
+                    🇲🇾 Permainan Interaktif & Pendidikan
+                </span>
+                <h2 class="font-display text-4xl sm:text-5xl font-extrabold text-white tracking-wide">
+                    Uji Kepakaran <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">Bahasa Melayu</span> Anda!
+                </h2>
+                <p class="text-slate-300 text-sm sm:text-base max-w-md mx-auto">
+                    Kuasai tatabahasa, peribahasa, ejaan DBP, dan kosa kata dalam permainan cabaran bersiri yang menyeronokkan.
+                </p>
+            </div>
+
+            <!-- Game Mode Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left pt-4">
+
+                <!-- Mode 1: Kembara Utama -->
+                <div onclick="startAdventure()" class="glass-dark hover:border-emerald-500/60 rounded-2xl p-5 cursor-pointer transform hover:-translate-y-1 transition duration-200 group relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fa-solid fa-map-location-dot text-8xl text-emerald-400"></i>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-compass text-xl"></i>
+                    </div>
+                    <h3 class="font-display text-xl font-bold text-white group-hover:text-amber-300 transition">Mod Kembara</h3>
+                    <p class="text-xs text-slate-400 mt-1">Selesaikan 5 peringkat bertema dari Hutan Peribahasa hingga Istana Bahasa.</p>
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-emerald-400">
+                        <span id="adventureProgressText">Peringkat 1 / 5</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+
+                <!-- Mode 2: Cabaran Kilat -->
+                <div onclick="startSpeedMode()" class="glass-dark hover:border-amber-500/60 rounded-2xl p-5 cursor-pointer transform hover:-translate-y-1 transition duration-200 group relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fa-solid fa-bolt text-8xl text-amber-400"></i>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-stopwatch text-xl"></i>
+                    </div>
+                    <h3 class="font-display text-xl font-bold text-white group-hover:text-amber-300 transition">Cabaran Kilat (60s)</h3>
+                    <p class="text-xs text-slate-400 mt-1">Jawab seberapa banyak soalan betul dalam masa 60 saat!</p>
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-amber-400">
+                        <span>Skor Tertinggi: <span id="highScoreText">0</span></span>
+                        <i class="fa-solid fa-play group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+
+                <!-- Mode 3: Teka Peribahasa Emoji -->
+                <div onclick="startEmojiMode()" class="glass-dark hover:border-sky-500/60 rounded-2xl p-5 cursor-pointer transform hover:-translate-y-1 transition duration-200 group relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fa-solid fa-icons text-8xl text-sky-400"></i>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/20 border border-sky-400/30 text-sky-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-face-smile-wink text-xl"></i>
+                    </div>
+                    <h3 class="font-display text-xl font-bold text-white group-hover:text-sky-300 transition">Teka Peribahasa Emoji</h3>
+                    <p class="text-xs text-slate-400 mt-1">Cari peribahasa atau simpulan bahasa berdasarkan kiasan piktogram emoji.</p>
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-sky-400">
+                        <span>Asah Minda Visual</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+
+                <!-- Mode 4: Susun Kata Anagram -->
+                <div onclick="startUnscrambleMode()" class="glass-dark hover:border-purple-500/60 rounded-2xl p-5 cursor-pointer transform hover:-translate-y-1 transition duration-200 group relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fa-solid fa-font text-8xl text-purple-400"></i>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-400/30 text-purple-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-arrow-down-a-z text-xl"></i>
+                    </div>
+                    <h3 class="font-display text-xl font-bold text-white group-hover:text-purple-300 transition">Susun Kata (Anagram)</h3>
+                    <p class="text-xs text-slate-400 mt-1">Susun semula huruf-huruf bercelaru untuk membentuk kata Bahasa Melayu yang sah.</p>
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-purple-400">
+                        <span>Kosa Kata & Ejaan</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Statistics / Reset Bar -->
+            <div class="pt-2 flex flex-wrap items-center justify-between text-xs text-slate-400 bg-slate-800/40 px-4 py-3 rounded-xl border border-slate-700/50">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-medal text-amber-400"></i>
+                    <span>Gelaran: <strong id="playerTitle" class="text-amber-300">Pelajar Bahasa</strong></span>
+                </div>
+                <button onclick="resetProgress()" class="hover:text-rose-400 transition flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-left"></i> Sıfırlah Kemajuan
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. MAP / LEVEL SELECT VIEW -->
+        <section id="mapView" class="w-full max-w-2xl hidden space-y-6 py-4">
+            <div class="flex items-center justify-between">
+                <button onclick="showView('mainMenu')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium flex items-center gap-2 border border-slate-700 transition">
+                    <i class="fa-solid fa-arrow-left"></i> Menu Utama
+                </button>
+                <h2 class="font-display text-2xl font-bold text-white">Peta Kembara Bahasa</h2>
+                <div class="w-20"></div>
+            </div>
+
+            <div class="glass-dark rounded-3xl p-6 border border-emerald-500/20 relative overflow-hidden space-y-6">
+                <div class="text-center max-w-md mx-auto">
+                    <p class="text-xs text-emerald-400 font-semibold uppercase tracking-wider">Kembara Raja Bahasa</p>
+                    <h3 class="text-xl font-bold text-white mt-0.5">Pilih Peringkat Cabaran</h3>
+                </div>
+
+                <!-- Path Nodes -->
+                <div id="levelNodesContainer" class="space-y-4 relative py-2">
+                    <!-- Dynamic Level Nodes inserted via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. QUIZ GAMEPLAY VIEW (Multiple Choice) -->
+        <section id="quizView" class="w-full max-w-2xl hidden space-y-4 py-2">
+            <!-- Top HUD Bar -->
+            <div class="glass-dark rounded-2xl p-4 flex items-center justify-between border border-slate-700">
+                <button onclick="confirmExit()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                <!-- Category Tag -->
+                <div class="text-center">
+                    <span id="quizCategoryTag" class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-semibold">
+                        Tatabahasa
+                    </span>
+                    <div id="quizLevelTitle" class="text-xs text-slate-400 mt-1">Soalan 1 / 5</div>
+                </div>
+
+                <!-- Timer or Score HUD -->
+                <div class="flex items-center gap-3">
+                    <div id="timerContainer" class="flex items-center gap-1.5 text-amber-400 bg-amber-500/10 px-3 py-1 rounded-lg border border-amber-500/30">
+                        <i class="fa-solid fa-clock text-xs"></i>
+                        <span id="timerText" class="font-mono font-bold text-sm">60s</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400">Skor</div>
+                        <div id="quizScoreText" class="font-bold text-white text-sm">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700/50">
+                <div id="quizProgressBar" class="bg-gradient-to-r from-emerald-500 to-amber-400 h-full w-0 transition-all duration-300"></div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative text-slate-800 space-y-6">
+                <!-- Question Context / Prompt -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
+                        <span id="questionTypeLabel"><i class="fa-solid fa-circle-question mr-1 text-emerald-600"></i> Soalan Pilihan Jawapan</span>
+                        <button id="hintBtn" onclick="useHint()" class="text-amber-600 hover:text-amber-700 flex items-center gap-1 transition font-bold bg-amber-100 px-2.5 py-1 rounded-md">
+                            <i class="fa-solid fa-lightbulb"></i> Petunjuk (<span id="hintsLeft">2</span>)
+                        </button>
+                    </div>
+
+                    <h3 id="questionText" class="text-xl sm:text-2xl font-bold text-slate-900 leading-relaxed pt-2">
+                        -- Text Soalan --
+                    </h3>
+                </div>
+
+                <!-- Option Buttons Grid -->
+                <div id="optionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <!-- Inserted dynamically -->
+                </div>
+
+                <!-- Hint display box -->
+                <div id="hintBox" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info text-amber-600 mt-0.5"></i>
+                    <span id="hintBoxText">Petunjuk akan dipaparkan di sini.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. EMOJI PERIBAHASA VIEW -->
+        <section id="emojiView" class="w-full max-w-2xl hidden space-y-4 py-2">
+            <!-- HUD -->
+            <div class="glass-dark rounded-2xl p-4 flex items-center justify-between border border-slate-700">
+                <button onclick="confirmExit()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="text-center">
+                    <span class="px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30 text-xs font-semibold">
+                        Teka Peribahasa Emoji
+                    </span>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-slate-400">Skor</div>
+                    <div id="emojiScoreText" class="font-bold text-white text-sm">0</div>
+                </div>
+            </div>
+
+            <!-- Emoji Card -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-800 space-y-6 text-center">
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Fahamkan gabungan gambar di bawah:
+                </div>
+
+                <!-- Emoji Display Box -->
+                <div id="emojiDisplayBox" class="text-5xl sm:text-6xl tracking-widest bg-slate-100/80 py-6 rounded-2xl border border-slate-200 shadow-inner flex justify-center items-center gap-3">
+                    🐱 💧
+                </div>
+
+                <div class="text-sm font-medium text-slate-600">
+                    Maksud: <span id="emojiMeaningText" class="italic font-normal text-slate-800">"Seseorang yang sangat takut akan air"</span>
+                </div>
+
+                <!-- Letter Slots -->
+                <div id="emojiSlots" class="flex flex-wrap justify-center gap-2 py-2">
+                    <!-- Dynamic Answer Letter Slots -->
+                </div>
+
+                <!-- Bank of Choice Letters -->
+                <div id="emojiLetterBank" class="flex flex-wrap justify-center gap-2 pt-2 border-t border-slate-200">
+                    <!-- Dynamic Letter Buttons -->
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-center gap-3 pt-2">
+                    <button onclick="clearEmojiSlots()" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition">
+                        <i class="fa-solid fa-eraser mr-1"></i> Padam All
+                    </button>
+                    <button onclick="submitEmojiAnswer()" class="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-600/30">
+                        <i class="fa-solid fa-check mr-1"></i> Semak Jawapan
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. UNSCRAMBLE WORD VIEW -->
+        <section id="unscrambleView" class="w-full max-w-2xl hidden space-y-4 py-2">
+            <!-- HUD -->
+            <div class="glass-dark rounded-2xl p-4 flex items-center justify-between border border-slate-700">
+                <button onclick="confirmExit()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="text-center">
+                    <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30 text-xs font-semibold">
+                        Susun Kata (Anagram)
+                    </span>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-slate-400">Skor</div>
+                    <div id="wordScoreText" class="font-bold text-white text-sm">0</div>
+                </div>
+            </div>
+
+            <!-- Card -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-800 space-y-6 text-center">
+                <div class="space-y-1">
+                    <span class="text-xs font-semibold text-purple-700 uppercase tracking-wider">Petunjuk Maksud</span>
+                    <h3 id="wordHintText" class="text-lg font-bold text-slate-800">
+                        -- Clue word --
+                    </h3>
+                </div>
+
+                <!-- Current Word Input Slot -->
+                <div id="wordInputSlots" class="min-h-[60px] bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 p-3 flex flex-wrap justify-center items-center gap-2">
+                    <!-- Tiles placed here -->
+                </div>
+
+                <!-- Scrambled Letters Pool -->
+                <div class="space-y-2">
+                    <div class="text-xs text-slate-500">Ketik huruf di bawah untuk menyusun kata:</div>
+                    <div id="scrambledPool" class="flex flex-wrap justify-center gap-2">
+                        <!-- Tiles to pick from -->
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center gap-3 pt-2">
+                    <button onclick="resetWordTiles()" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Susun Semula
+                    </button>
+                    <button onclick="submitWordAnswer()" class="px-6 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition shadow-lg shadow-purple-600/30">
+                        <i class="fa-solid fa-circle-check mr-1"></i> Hantar Jawapan
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. RESULT / SUMMARY MODAL VIEW -->
+        <section id="resultView" class="w-full max-w-md hidden space-y-6 py-4 text-center">
+            <div class="glass-dark rounded-3xl p-8 border border-slate-700 shadow-2xl space-y-6 relative overflow-hidden">
+                <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center shadow-xl shadow-amber-500/20 text-emerald-950 text-4xl">
+                    <i id="resultIcon" class="fa-solid fa-trophy"></i>
+                </div>
+
+                <div class="space-y-2">
+                    <h2 id="resultTitle" class="font-display text-3xl font-bold text-white">Tahniah!</h2>
+                    <p id="resultSubtitle" class="text-slate-300 text-sm">Anda telah menyelesaikan cabaran ini dengan cemerlang.</p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 gap-3 bg-slate-800/60 p-4 rounded-2xl border border-slate-700">
+                    <div class="p-2">
+                        <div class="text-xs text-slate-400">Skor Diperoleh</div>
+                        <div id="resultScore" class="text-2xl font-bold text-amber-400 mt-0.5">0</div>
+                    </div>
+                    <div class="p-2">
+                        <div class="text-xs text-slate-400">Ketepatan</div>
+                        <div id="resultAccuracy" class="text-2xl font-bold text-emerald-400 mt-0.5">100%</div>
+                    </div>
+                </div>
+
+                <div id="rewardXPBadge" class="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 px-4 py-2 rounded-full text-xs font-bold">
+                    <i class="fa-solid fa-star text-amber-400"></i> +<span id="resultXP">50</span> XP Ditambah
+                </div>
+
+                <!-- Actions -->
+                <div class="space-y-2 pt-2">
+                    <button id="nextLevelBtn" onclick="nextLevelOrRetry()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition">
+                        Teruskan Kembara <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                    <button onclick="showView('mainMenu')" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition">
+                        Kembali ke Menu Utama
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- GLOSARI / KAMUS MODAL -->
+    <div id="glosariModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-dark w-full max-w-xl rounded-3xl border border-slate-700 p-6 space-y-4 max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <div class="flex items-center gap-2 text-white font-display text-xl">
+                    <i class="fa-solid fa-book-bookmark text-emerald-400"></i>
+                    <span>Glosari Bahasa Melayu</span>
+                </div>
+                <button onclick="closeGlosari()" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Search input -->
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                <input type="text" id="glosariSearch" oninput="filterGlosari()" placeholder="Cari peribahasa, tatabahasa, atau ejaan..." class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <!-- List Container -->
+            <div id="glosariList" class="flex-grow overflow-y-auto space-y-3 pr-1 text-sm text-slate-300">
+                <!-- Inserted via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- DIALOG MODAL (Alert replacement) -->
+    <div id="dialogModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-dark max-w-sm w-full rounded-2xl p-6 text-center space-y-4 border border-slate-700 shadow-2xl">
+            <div id="dialogIcon" class="w-12 h-12 mx-auto rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <h3 id="dialogTitle" class="font-bold text-lg text-white">Notifikasi</h3>
+            <p id="dialogMessage" class="text-slate-300 text-xs leading-relaxed">Mesej di sini.</p>
+            <div id="dialogButtons" class="flex items-center justify-center gap-2 pt-2">
+                <button id="dialogOkBtn" onclick="closeDialog()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-5xl mx-auto px-4 py-4 text-center text-xs text-slate-500 z-10">
+        <p>Raja Bahasa &copy; 2026 • Dicipta untuk Pembelajaran Bahasa Melayu Interaktif</p>
+    </footer>
+
+    <!-- GAME LOGIC SCRIPT -->
+    <script>
+        /* ==========================================================================
+           1. DATA STRUCTURES & QUESTIONS
+           ========================================================================== */
+        
+        // Adventure Levels & Questions Database
+        const ADVENTURE_LEVELS = [
+            {
+                id: 1,
+                title: "Peringkat 1: Hutan Peribahasa",
+                desc: "Uji kefahaman simpulan bahasa & peribahasa Melayu.",
+                icon: "fa-tree",
+                questions: [
+                    {
+                        q: "Apakah maksud peribahasa 'Bagai aur dengan tebing'?",
+                        options: ["Saling tolong-menolong antara satu sama lain", "Suka bertengkar setiap masa", "Orang yang sangat sombong", "Sesuatu yang sukar dicapai"],
+                        answer: 0,
+                        hint: "Fikirkan bagaimana akar aur dan tebing sungai saling mengukuhkan.",
+                        category: "Peribahasa",
+                        glosari: { term: "Bagai aur dengan tebing", def: "Hubungan yang sangat rapat dan saling bekerjasama/tolong-menolong." }
+                    },
+                    {
+                        q: "Lengkapkan peribahasa: 'Seperti katak di bawah ______'.",
+                        options: ["sampan", "tempurung", "pokok", "jambatan"],
+                        answer: 1,
+                        hint: "Bekas keras daripada tempurung kelapa.",
+                        category: "Peribahasa",
+                        glosari: { term: "Seperti katak di bawah tempurung", def: "Orang yang cetek pengetahuannya kerana tidak mahu meluas pandangan." }
+                    },
+                    {
+                        q: "Apakah maksud simpulan bahasa 'Ulat Buku'?",
+                        options: ["Kotoran pada buku", "Orang yang suka membaca buku", "Penulis novel", "Buku yang rosak dimakan serangga"],
+                        answer: 1,
+                        hint: "Seseorang yang sentiasa menghabiskan masa membaca.",
+                        category: "Simpulan Bahasa",
+                        glosari: { term: "Ulat Buku", def: "Orang yang sangat tekun dan gemar membaca buku." }
+                    },
+                    {
+                        q: "Isi tempat kosong: 'Melentur buluh biarlah dari ______'.",
+                        options: ["akarnya", "batangnya", "rebungnya", "daunnya"],
+                        answer: 2,
+                        hint: "Anak pokok buluh yang masih lembut.",
+                        category: "Peribahasa",
+                        glosari: { term: "Melentur buluh biarlah dari rebungnya", def: "Mendidik anak hendaklah bermula sejak mereka kecil lagi." }
+                    },
+                    {
+                        q: "Simpulan bahasa 'Kaki Ayam' bermaksud:",
+                        options: ["Berjalan tanpa memakai kasut", "Suka bermain bola", "Kaki yang bersaiz kecil", "Ayam yang ada dua kaki"],
+                        answer: 0,
+                        hint: "Gaya berjalan di luar tanpa alas kaki.",
+                        category: "Simpulan Bahasa",
+                        glosari: { term: "Kaki Ayam", def: "Tidak berkasut atau tidak memakai alas kaki semasa berjalan." }
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Peringkat 2: Lembah Penjodoh Bilangan",
+                desc: "Kuasai kata pengukur untuk pelbagai objek dan benda.",
+                icon: "fa-feather",
+                questions: [
+                    {
+                        q: "Pilih penjodoh bilangan yang betul: 'Pak Cik Ali membeli dua ______ keris antik.'",
+                        options: ["buah", "bilah", "pucuk", "batang"],
+                        answer: 1,
+                        hint: "Digunakan untuk benda tajam dan berpemegang.",
+                        category: "Penjodoh Bilangan",
+                        glosari: { term: "Bilah", def: "Penjodoh bilangan untuk benda tajam seperti keris, pisau, dan pedang." }
+                    },
+                    {
+                        q: "Ibu memetik se______ bunga mawar di halaman rumah.",
+                        options: ["kuntum", "helai", "pucuk", "utas"],
+                        answer: 0,
+                        hint: "Khusus untuk kuntuman bunga.",
+                        category: "Penjodoh Bilangan",
+                        glosari: { term: "Kuntum", def: "Penjodoh bilangan untuk bunga-bungaan." }
+                    },
+                    {
+                        q: "Polis menjumpai tiga ______ pistol di lokasi kejadian.",
+                        options: ["laras", "pucuk", "buah", "batang"],
+                        answer: 1,
+                        hint: "Penjodoh bilangan bagi surat atau senjata api seperti pistol.",
+                        category: "Penjodoh Bilangan",
+                        glosari: { term: "Pucuk", def: "Penjodoh bilangan untuk surat dan senjata api (pistol/senapang)." }
+                    },
+                    {
+                        q: "Pilih kata yang betul: 'Sebuah ______ terletak di tengah laut.'",
+                        options: ["rumah", "pulau", "kapal", "Semua di atas betul"],
+                        answer: 3,
+                        hint: "Penjodoh 'buah' boleh digunakan untuk bangunan, pulau, dan kenderaan besar.",
+                        category: "Penjodoh Bilangan",
+                        glosari: { term: "Buah", def: "Penjodoh bilangan untuk benda besar, tidak tentu bentuk, bangunan, atau kenderaan." }
+                    },
+                    {
+                        q: "Abang membawa se______ pisang dari dusun.",
+                        options: ["sikat", "tandan", "biji", "Sikat atau Tandan"],
+                        answer: 3,
+                        hint: "Boleh merujuk kepada setandan pisang atau sesikat pisang mengikut konteks.",
+                        category: "Penjodoh Bilangan",
+                        glosari: { term: "Sikat / Tandan", def: "Digunakan mengikut kelompok buah pisang." }
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Peringkat 3: Gua Ejaan Betul (DBP)",
+                desc: "Uji kepekaan ejaan mengikut pedoman Dewan Bahasa dan Pustaka.",
+                icon: "fa-spell-check",
+                questions: [
+                    {
+                        q: "Manakah ejaan kata majmuk yang BETUL?",
+                        options: ["tengahhari", "tengah hari", "tengah-hari", "tenggahari"],
+                        answer: 1,
+                        hint: "Kata majmuk bebas dieja terpisah.",
+                        category: "Ejaan DBP",
+                        glosari: { term: "Tengah hari", def: "Dieja dijarakkan sebagai dua kata berasingan." }
+                    },
+                    {
+                        q: "Pilih ejaan yang tepat mengikut DBP bagi perkataan ini:",
+                        options: ["Aturcara", "Atur cara", "Atur-cara", "Atorcara"],
+                        answer: 1,
+                        hint: "Ejaan rangkai kata umum dieja terpisah.",
+                        category: "Ejaan DBP",
+                        glosari: { term: "Atur cara", def: "Ejaan betul ialah dua perkataan berasingan." }
+                    },
+                    {
+                        q: "Manakah ejaan pinjaman yang BETUL?",
+                        options: ["Eksport", "Export", "Ekport", "Eksportasi"],
+                        answer: 0,
+                        hint: "Huruf 'x' digantikan dengan 'ks' dalam Bahasa Melayu.",
+                        category: "Ejaan DBP",
+                        glosari: { term: "Eksport", def: "Penyesuaian ejaan bahasa asing ke Bahasa Melayu." }
+                    },
+                    {
+                        q: "Pilih ejaan rasmi bagi hidangan popular ini:",
+                        options: ["Mee goreng", "Mi goreng", "Mie goreng", "Mei goreng"],
+                        answer: 1,
+                        hint: "Ejaan standard DBP menggunakan dua huruf sahaja.",
+                        category: "Ejaan DBP",
+                        glosari: { term: "Mi", def: "Ejaan standard DBP bagi mi (bukan mee/mie)." }
+                    },
+                    {
+                        q: "Pilih ejaan kata imbuhan yang BETUL:",
+                        options: ["mengkategorikan", "mengkategori", "meng-kategori", "me-kategorikan"],
+                        answer: 0,
+                        hint: "Kata dasar 'kategori' menerima imbuhan meng-...-kan.",
+                        category: "Ejaan DBP",
+                        glosari: { term: "Mengkategorikan", def: "Pengimbuhan kata pinjaman berawalan 'k'." }
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "Peringkat 4: Bukit Tatabahasa & Imbuhan",
+                desc: "Pelajari Hukum DM, imbuhan meN-, peN-, di-, dan struktur ayat.",
+                icon: "fa-pen-nib",
+                questions: [
+                    {
+                        q: "Antara frasa berikut, manakah yang mematuhi Hukum DM (Diterangkan-Menerangkan)?",
+                        options: ["Goreng pisang", "Pisang goreng", "Cili sos", "Lain-lain hal"],
+                        answer: 1,
+                        hint: "Unsur yang diterangkan (pisang) mendahului penerang (goreng).",
+                        category: "Tatabahasa",
+                        glosari: { term: "Hukum DM", def: "Unsur utama (D) didahulukan, diikuti unsur penerang (M)." }
+                    },
+                    {
+                        q: "Siti ______ (pelihara) seekor kucing comel di rumahnya.",
+                        options: ["mempelihara", "memelihara", "mepelihara", "pengpelihara"],
+                        answer: 1,
+                        hint: "Huruf 'p' pada kata dasar 'pelihara' melebur apabila menerima imbuhan meN-.",
+                        category: "Imbuhan",
+                        glosari: { term: "Memelihara", def: "Awalan meN- mengubah 'p' menjadi 'm'." }
+                    },
+                    {
+                        q: "Pilih ayat yang menggunakan kata nama am yang betul:",
+                        options: ["Ahmad pergi ke sekolah menaiki bas.", "Ahmad pergi ke Sekolah menaiki Bas.", "ahmad pergi ke sekolah menaiki bas.", "Ahmad Pergi Ke Sekolah."],
+                        answer: 0,
+                        hint: "Kata nama am dieja huruf kecil kecuali awal ayat.",
+                        category: "Tatabahasa",
+                        glosari: { term: "Kata Nama Am", def: "Perkataan merujuk benda/tempat secara umum." }
+                    },
+                    {
+                        q: "Apakah kata kerja transitif dalam ayat: 'Ibu memasak sup ayam di dapur'?",
+                        options: ["Ibu", "memasak", "sup ayam", "di dapur"],
+                        answer: 1,
+                        hint: "Perbuatan yang memerlukan objek (sup ayam).",
+                        category: "Tatabahasa",
+                        glosari: { term: "Kata Kerja Transitif", def: "Kata kerja yang mesti diikuti oleh objek." }
+                    },
+                    {
+                        q: "Antara berikut, manakah kata adjektif perasaan?",
+                        options: ["Tinggi", "Merah", "Rindu", "Pantas"],
+                        answer: 2,
+                        hint: "Menerangkan emosi atau perasaan jiwa.",
+                        category: "Tatabahasa",
+                        glosari: { term: "Kata Adjektif Perasaan", def: "Kata yang membawa pengertian konsep perasaan (rindu, gembira, sedih)." }
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: "Peringkat 5: Istana Raja Bahasa",
+                desc: "Cabaran puncak merangkumi semua ilmu bahasa Melayu!",
+                icon: "fa-crown",
+                questions: [
+                    {
+                        q: "Apakah maksud simpulan bahasa 'Tangan Terbuka'?",
+                        options: ["Menyambut kedatangan seseorang dengan gembira", "Suka memberi sedekah", "Orang yang pemalas", "Suka mencuri"],
+                        answer: 0,
+                        hint: "Penerimaan tetamu dengan penuh kerelaan dan mesra.",
+                        category: "Simpulan Bahasa",
+                        glosari: { term: "Tangan Terbuka", def: "Menerima kehadiran seseorang dengan ikhlas dan gembira." }
+                    },
+                    {
+                        q: "Pilih penjodoh bilangan yang sesuai untuk 'cincin':",
+                        options: ["sebuah", "sebentuk", "seurat", "selembar"],
+                        answer: 1,
+                        hint: "Digunakan khusus untuk benda kecil melingkar.",
+                        category: "Penjodoh Bilangan",
+                        glosari: { term: "Bentuk", def: "Penjodoh bilangan bagi cincin dan mata kail." }
+                    },
+                    {
+                        q: "Manakah ejaan yang betul bagi dokumen rasmi DBP?",
+                        options: ["Cenderamata", "Cenderahati", "Cendera mata", "Cenderamata / Cenderahati keduanya sah tetapi DBP mengutamakan Cenderamata"],
+                        answer: 3,
+                        hint: "Perkataan cenderamata diiktiraf secara meluas sebagai pemberian kenangan.",
+                        category: "Ejaan DBP",
+                        glosari: { term: "Cenderamata", def: "Pemberian atau hadiah sebagai kenang-kenangan." }
+                    },
+                    {
+                        q: "Apakah antonim (lawan kata) bagi perkataan 'Dahaga'?",
+                        options: ["Lapar", "Kenyang", "Puas", "Segar"],
+                        answer: 2,
+                        hint: "Perasaan apabila sudah mendapat cukup air atau kehausan hilang.",
+                        category: "Kosa Kata",
+                        glosari: { term: "Puas", def: "Lawan bagi dahaga (hilang dahaga) atau terpenuhi keinginan." }
+                    },
+                    {
+                        q: "Lengkapkan peribahasa: 'Alang-alang menyeluk pekasam, biarlah sampai ke pangkal ______'.",
+                        options: ["lengan", "siku", "bahu", "jari"],
+                        answer: 0,
+                        hint: "Bahagian tangan di atas siku.",
+                        category: "Peribahasa",
+                        glosari: { term: "Alang-alang menyeluk pekasam, biarlah sampai ke pangkal lengan", def: "Melakukan sesuatu pekerjaan hendaklah dibuat sehingga selesai." }
+                    }
+                ]
+            }
+        ];
+
+        // Emoji Peribahasa Questions
+        const EMOJI_QUESTIONS = [
+            {
+                emojis: "🐱 💧",
+                letters: ["K", "A", "K", "I", "A", "Y", "A", "M", "K", "U", "C", "I", "N", "G", "A", "I", "R"],
+                answer: "KUCING AIR",
+                meaning: "Suka atau pandai berenang (atau merujuk simpulan bahasa berkaitan air).",
+                displayEmojis: "🐱 💦"
+            },
+            {
+                emojis: "📖 🐛",
+                letters: ["U", "L", "A", "T", "B", "U", "K", "U", "P", "E", "N", "A"],
+                answer: "ULAT BUKU",
+                meaning: "Orang yang sangat rajin membaca buku.",
+                displayEmojis: "📖 🐛"
+            },
+            {
+                emojis: "🐔 🦶",
+                letters: ["K", "A", "K", "I", "A", "Y", "A", "M", "I", "T", "I", "K"],
+                answer: "KAKI AYAM",
+                meaning: "Berjalan tanpa memakai sebarang kasut.",
+                displayEmojis: "👣 🐔"
+            },
+            {
+                emojis: "🐸 🪨",
+                letters: ["K", "A", "T", "A", "K", "T", "E", "M", "P", "U", "R", "U", "N", "G"],
+                answer: "KATAK TEMPURUNG",
+                meaning: "Orang yang cetek pengetahuannya.",
+                displayEmojis: "🐸 🛖"
+            }
+        ];
+
+        // Unscramble Word Questions
+        const UNSCRAMBLE_QUESTIONS = [
+            {
+                word: "HELANG",
+                hint: "Burung pemangsa kebangsaan yang gagah di udara.",
+                category: "Haiwan"
+            },
+            {
+                word: "MERDEKA",
+                hint: "Bebas daripada penjajahan atau naungan kuasa luar.",
+                category: "Sejarah"
+            },
+            {
+                word: "HIBURAN",
+                hint: "Sesuatu yang menyenangkan hati dan melapangkan fikiran.",
+                category: "Umum"
+            },
+            {
+                word: "PAHLAWAN",
+                hint: "Pejuang gagah berani seperti Hang Tuah.",
+                category: "Sejarah"
+            },
+            {
+                word: "PERIBASA",
+                hint: "Susunan kata indah yang mengandungi iktibar.",
+                category: "Bahasa"
+            }
+        ];
+
+        /* ==========================================================================
+           2. AUDIO SYNTHESIZER (Web Audio API - No External Sound Files Needed)
+           ========================================================================== */
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+            }
+
+            playClick() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.05);
+            }
+
+            playCorrect() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(now + 0.35);
+            }
+
+            playWrong() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(150, now + 0.25);
+                
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(now + 0.25);
+            }
+
+            playVictory() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const notes = [440, 554.37, 659.25, 880];
+                notes.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const now = this.ctx.currentTime + (i * 0.12);
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                });
+            }
+        }
+
+        const sound = new SoundFX();
+
+        function toggleAudio() {
+            sound.enabled = !sound.enabled;
+            const icon = document.getElementById('audioIcon');
+            if (sound.enabled) {
+                icon.className = "fa-solid fa-volume-high";
+                sound.playClick();
+            } else {
+                icon.className = "fa-solid fa-volume-xmark";
+            }
+            saveState();
+        }
+
+        /* ==========================================================================
+           3. GAME STATE MANAGEMENT
+           ========================================================================== */
+        let gameState = {
+            xp: 0,
+            unlockedLevel: 1,
+            highScoreSpeed: 0,
+            audioEnabled: true,
+            hintsCount: 3
+        };
+
+        let currentMode = 'adventure'; // adventure, speed, emoji, unscramble
+        let currentLevelIdx = 0;
+        let currentQuestionIdx = 0;
+        let currentScore = 0;
+        let speedTimer = null;
+        let speedTimeLeft = 60;
+        let activeQuestions = [];
+        let speedCorrectCount = 0;
+        let speedTotalCount = 0;
+
+        // Emoji Mode State
+        let currentEmojiIdx = 0;
+        let selectedEmojiLetters = [];
+
+        // Unscramble State
+        let currentUnscrambleIdx = 0;
+        let placedWordTiles = [];
+        let remainingWordPool = [];
+
+        // Load / Save State
+        function loadState() {
+            const saved = localStorage.getItem('raja_bahasa_save');
+            if (saved) {
+                try {
+                    gameState = { ...gameState, ...JSON.parse(saved) };
+                } catch(e) {}
+            }
+            sound.enabled = gameState.audioEnabled;
+            document.getElementById('audioIcon').className = sound.enabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
+            updateUIStats();
+        }
+
+        function saveState() {
+            gameState.audioEnabled = sound.enabled;
+            localStorage.setItem('raja_bahasa_save', JSON.stringify(gameState));
+            updateUIStats();
+        }
+
+        function updateUIStats() {
+            document.getElementById('playerXP').innerText = gameState.xp;
+            document.getElementById('highScoreText').innerText = gameState.highScoreSpeed;
+            document.getElementById('hintsLeft').innerText = gameState.hintsCount;
+            document.getElementById('adventureProgressText').innerText = `Peringkat ${gameState.unlockedLevel} / 5`;
+            
+            // Player Title according to XP
+            let title = "Pelajar Bahasa";
+            if (gameState.xp >= 100) title = "Pendekar Kata";
+            if (gameState.xp >= 250) title = "Pujangga Melayu";
+            if (gameState.xp >= 500) title = "Munsyi Bahasa";
+            if (gameState.xp >= 1000) title = "Raja Bahasa 👑";
+            document.getElementById('playerTitle').innerText = title;
+        }
+
+        function resetProgress() {
+            showDialog("Sahkan Sıfırlah", "Adakah anda pasti mahu memadamkan semua rekod kemajuan dan XP?", true, () => {
+                gameState = {
+                    xp: 0,
+                    unlockedLevel: 1,
+                    highScoreSpeed: 0,
+                    audioEnabled: true,
+                    hintsCount: 3
+                };
+                saveState();
+                renderMapNodes();
+                showDialog("Selesai", "Kemajuan anda telah disifarkan.");
+            });
+        }
+
+        /* ==========================================================================
+           4. VIEW NAVIGATION
+           ========================================================================== */
+        function showView(viewId) {
+            sound.playClick();
+            const views = ['mainMenu', 'mapView', 'quizView', 'emojiView', 'unscrambleView', 'resultView'];
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === viewId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ==========================================================================
+           5. ADVENTURE MODE & MAP
+           ========================================================================== */
+        function startAdventure() {
+            renderMapNodes();
+            showView('mapView');
+        }
+
+        function renderMapNodes() {
+            const container = document.getElementById('levelNodesContainer');
+            container.innerHTML = '';
+
+            ADVENTURE_LEVELS.forEach((lvl, idx) => {
+                const isUnlocked = lvl.id <= gameState.unlockedLevel;
+                const isCurrent = lvl.id === gameState.unlockedLevel;
+
+                const node = document.createElement('div');
+                node.className = `p-4 rounded-2xl flex items-center justify-between border transition duration-200 ${
+                    isUnlocked 
+                        ? (isCurrent ? 'bg-gradient-to-r from-emerald-900/80 to-slate-800 border-amber-400 shadow-lg shadow-emerald-950/50' : 'bg-slate-800/80 border-slate-700 hover:border-emerald-500/50')
+                        : 'bg-slate-900/50 border-slate-800 opacity-60'
+                }`;
+
+                node.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ${
+                            isUnlocked 
+                                ? (isCurrent ? 'bg-amber-400 text-slate-900 bounce-short' : 'bg-emerald-600 text-white')
+                                : 'bg-slate-800 text-slate-500'
+                        }">
+                            <i class="fa-solid ${isUnlocked ? lvl.icon : 'fa-lock'}"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display font-bold text-white text-base ${isUnlocked ? '' : 'text-slate-500'}">${lvl.title}</h4>
+                            <p class="text-xs text-slate-400">${lvl.desc}</p>
+                        </div>
+                    </div>
+                    <div>
+                        ${isUnlocked 
+                            ? `<button onclick="launchAdventureLevel(${idx})" class="px-4 py-2 rounded-xl ${isCurrent ? 'bg-amber-400 text-slate-950 hover:bg-amber-300' : 'bg-emerald-600 text-white hover:bg-emerald-500'} font-bold text-xs transition flex items-center gap-1">
+                                <i class="fa-solid fa-play"></i> ${isCurrent ? 'Mula' : 'Ulang'}
+                              </button>`
+                            : `<span class="text-xs text-slate-600 font-semibold px-3 py-1 rounded-lg bg-slate-800 border border-slate-700"><i class="fa-solid fa-lock mr-1"></i> Dikunci</span>`
+                        }
+                    </div>
+                `;
+                container.appendChild(node);
+            });
+        }
+
+        function launchAdventureLevel(levelIdx) {
+            currentMode = 'adventure';
+            currentLevelIdx = levelIdx;
+            currentQuestionIdx = 0;
+            currentScore = 0;
+            activeQuestions = ADVENTURE_LEVELS[levelIdx].questions;
+            
+            document.getElementById('timerContainer').classList.add('hidden');
+            showView('quizView');
+            loadQuestion();
+        }
+
+        /* ==========================================================================
+           6. SPEED MODE (TIME ATTACK)
+           ========================================================================== */
+        function startSpeedMode() {
+            currentMode = 'speed';
+            currentScore = 0;
+            speedTimeLeft = 60;
+            speedCorrectCount = 0;
+            speedTotalCount = 0;
+
+            // Combine all adventure questions and shuffle
+            activeQuestions = [];
+            ADVENTURE_LEVELS.forEach(lvl => {
+                activeQuestions.push(...lvl.questions);
+            });
+            shuffleArray(activeQuestions);
+
+            currentQuestionIdx = 0;
+            document.getElementById('timerContainer').classList.remove('hidden');
+            document.getElementById('timerText').innerText = `${speedTimeLeft}s`;
+
+            showView('quizView');
+            loadQuestion();
+
+            clearInterval(speedTimer);
+            speedTimer = setInterval(() => {
+                speedTimeLeft--;
+                document.getElementById('timerText').innerText = `${speedTimeLeft}s`;
+                if (speedTimeLeft <= 0) {
+                    clearInterval(speedTimer);
+                    endSpeedMode();
+                }
+            }, 1000);
+        }
+
+        function endSpeedMode() {
+            sound.playVictory();
+            const accuracy = speedTotalCount > 0 ? Math.round((speedCorrectCount / speedTotalCount) * 100) : 0;
+            const xpGained = currentScore;
+            
+            gameState.xp += xpGained;
+            if (currentScore > gameState.highScoreSpeed) {
+                gameState.highScoreSpeed = currentScore;
+            }
+            saveState();
+
+            document.getElementById('resultIcon').className = "fa-solid fa-bolt text-amber-500";
+            document.getElementById('resultTitle').innerText = "Tamat Masa Kilat!";
+            document.getElementById('resultSubtitle').innerText = `Masa 60 saat telah tamat. Jawab betul ${speedCorrectCount} daripada ${speedTotalCount} soalan.`;
+            document.getElementById('resultScore').innerText = currentScore;
+            document.getElementById('resultAccuracy').innerText = `${accuracy}%`;
+            document.getElementById('resultXP').innerText = xpGained;
+
+            const nextBtn = document.getElementById('nextLevelBtn');
+            nextBtn.innerHTML = `<i class="fa-solid fa-rotate-right mr-1"></i> Cuba Lagi Kilat`;
+            nextBtn.onclick = () => startSpeedMode();
+
+            triggerConfetti();
+            showView('resultView');
+        }
+
+        /* ==========================================================================
+           7. QUIZ ENGINE (Multiple Choice Questions)
+           ========================================================================== */
+        function loadQuestion() {
+            const hintBox = document.getElementById('hintBox');
+            hintBox.classList.add('hidden');
+
+            if (currentQuestionIdx >= activeQuestions.length) {
+                if (currentMode === 'adventure') {
+                    finishAdventureLevel();
+                } else if (currentMode === 'speed') {
+                    // Loop back shuffled questions if time remains
+                    shuffleArray(activeQuestions);
+                    currentQuestionIdx = 0;
+                    loadQuestion();
+                }
+                return;
+            }
+
+            const q = activeQuestions[currentQuestionIdx];
+            document.getElementById('questionText').innerText = q.q;
+            document.getElementById('quizCategoryTag').innerText = q.category || "General";
+            
+            if (currentMode === 'adventure') {
+                document.getElementById('quizLevelTitle').innerText = `${ADVENTURE_LEVELS[currentLevelIdx].title} • Soalan ${currentQuestionIdx + 1}/${activeQuestions.length}`;
+            } else {
+                document.getElementById('quizLevelTitle').innerText = `Mod Kilat • Soalan ${currentQuestionIdx + 1}`;
+            }
+
+            document.getElementById('quizScoreText').innerText = currentScore;
+
+            // Progress bar
+            const pct = Math.round(((currentQuestionIdx) / activeQuestions.length) * 100);
+            document.getElementById('quizProgressBar').style.width = `${pct}%`;
+
+            // Options Grid
+            const optionsContainer = document.getElementById('optionsGrid');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 rounded-2xl bg-slate-100 hover:bg-emerald-100/80 border-2 border-slate-200 hover:border-emerald-500 text-left text-slate-800 font-semibold text-sm transition-all duration-150 transform active:scale-98 flex items-center justify-between group";
+                btn.onclick = () => handleAnswerSelect(idx, btn);
+                btn.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-7 h-7 rounded-lg bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition">
+                            ${String.fromCharCode(65 + idx)}
+                        </span>
+                        <span>${opt}</span>
+                    </div>
+                    <i class="fa-regular fa-circle text-slate-300 group-hover:text-emerald-500 transition"></i>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswerSelect(selectedIdx, btnElement) {
+            const q = activeQuestions[currentQuestionIdx];
+            const isCorrect = selectedIdx === q.answer;
+
+            // Disable all buttons to prevent double click
+            const buttons = document.querySelectorAll('#optionsGrid button');
+            buttons.forEach(b => b.disabled = true);
+
+            if (currentMode === 'speed') speedTotalCount++;
+
+            if (isCorrect) {
+                sound.playCorrect();
+                btnElement.className = "p-4 rounded-2xl bg-emerald-500 text-white border-2 border-emerald-600 font-semibold text-sm transition flex items-center justify-between shadow-lg shadow-emerald-500/30";
+                btnElement.innerHTML += `<i class="fa-solid fa-circle-check text-xl"></i>`;
+                
+                currentScore += 20;
+                if (currentMode === 'speed') speedCorrectCount++;
+            } else {
+                sound.playWrong();
+                btnElement.className = "p-4 rounded-2xl bg-rose-500 text-white border-2 border-rose-600 font-semibold text-sm transition flex items-center justify-between shadow-lg shadow-rose-500/30";
+                btnElement.innerHTML += `<i class="fa-solid fa-circle-xmark text-xl"></i>`;
+
+                // Highlight correct answer
+                if (buttons[q.answer]) {
+                    buttons[q.answer].className = "p-4 rounded-2xl bg-emerald-100 text-emerald-900 border-2 border-emerald-500 font-semibold text-sm transition flex items-center justify-between";
+                }
+            }
+
+            document.getElementById('quizScoreText').innerText = currentScore;
+
+            setTimeout(() => {
+                currentQuestionIdx++;
+                loadQuestion();
+            }, 1100);
+        }
+
+        function useHint() {
+            if (gameState.hintsCount <= 0) {
+                showDialog("Tiada Petunjuk", "Anda telah kehabisan stok petunjuk!");
+                return;
+            }
+
+            const q = activeQuestions[currentQuestionIdx];
+            if (q && q.hint) {
+                gameState.hintsCount--;
+                saveState();
+                
+                const hintBox = document.getElementById('hintBox');
+                document.getElementById('hintBoxText').innerText = q.hint;
+                hintBox.classList.remove('hidden');
+                sound.playClick();
+            }
+        }
+
+        function finishAdventureLevel() {
+            sound.playVictory();
+            const xpGained = currentScore + 30;
+            gameState.xp += xpGained;
+
+            if (gameState.unlockedLevel === currentLevelIdx + 1 && gameState.unlockedLevel < ADVENTURE_LEVELS.length) {
+                gameState.unlockedLevel++;
+            }
+            saveState();
+
+            document.getElementById('resultIcon').className = "fa-solid fa-trophy text-amber-400";
+            document.getElementById('resultTitle').innerText = "Peringkat Selesai!";
+            document.getElementById('resultSubtitle').innerText = `Tahniah! Anda berjaya menamatkan ${ADVENTURE_LEVELS[currentLevelIdx].title}.`;
+            document.getElementById('resultScore').innerText = currentScore;
+            document.getElementById('resultAccuracy').innerText = `100%`;
+            document.getElementById('resultXP').innerText = xpGained;
+
+            const nextBtn = document.getElementById('nextLevelBtn');
+            if (currentLevelIdx + 1 < ADVENTURE_LEVELS.length) {
+                nextBtn.innerText = "Peringkat Seterusnya";
+                nextBtn.onclick = () => launchAdventureLevel(currentLevelIdx + 1);
+            } else {
+                nextBtn.innerText = "Khatam Raja Bahasa 👑";
+                nextBtn.onclick = () => showView('mainMenu');
+            }
+
+            triggerConfetti();
+            showView('resultView');
+        }
+
+        /* ==========================================================================
+           8. EMOJI PERIBAHASA MODE
+           ========================================================================== */
+        function startEmojiMode() {
+            currentMode = 'emoji';
+            currentEmojiIdx = 0;
+            currentScore = 0;
+            showView('emojiView');
+            loadEmojiQuestion();
+        }
+
+        function loadEmojiQuestion() {
+            if (currentEmojiIdx >= EMOJI_QUESTIONS.length) {
+                sound.playVictory();
+                gameState.xp += currentScore;
+                saveState();
+
+                document.getElementById('resultIcon').className = "fa-solid fa-face-smile-wink text-sky-400";
+                document.getElementById('resultTitle').innerText = "Pakar Emoji Peribahasa!";
+                document.getElementById('resultSubtitle').innerText = "Anda telah berjaya meneka semua peribahasa bergambar.";
+                document.getElementById('resultScore').innerText = currentScore;
+                document.getElementById('resultAccuracy').innerText = "100%";
+                document.getElementById('resultXP').innerText = currentScore;
+
+                const nextBtn = document.getElementById('nextLevelBtn');
+                nextBtn.innerText = "Main Semula";
+                nextBtn.onclick = () => startEmojiMode();
+
+                triggerConfetti();
+                showView('resultView');
+                return;
+            }
+
+            const q = EMOJI_QUESTIONS[currentEmojiIdx];
+            document.getElementById('emojiDisplayBox').innerText = q.displayEmojis || q.emojis;
+            document.getElementById('emojiMeaningText').innerText = `"${q.meaning}"`;
+            document.getElementById('emojiScoreText').innerText = currentScore;
+
+            selectedEmojiLetters = [];
+            renderEmojiSlotsAndBank();
+        }
+
+        function renderEmojiSlotsAndBank() {
+            const q = EMOJI_QUESTIONS[currentEmojiIdx];
+            const targetAnswer = q.answer; // e.g. "ULAT BUKU"
+
+            // Target slots
+            const slotsContainer = document.getElementById('emojiSlots');
+            slotsContainer.innerHTML = '';
+
+            let targetCharIndex = 0;
+            for (let i = 0; i < targetAnswer.length; i++) {
+                const char = targetAnswer[i];
+                if (char === ' ') {
+                    const space = document.createElement('div');
+                    space.className = "w-4 h-10";
+                    slotsContainer.appendChild(space);
+                } else {
+                    const slot = document.createElement('div');
+                    const fillChar = selectedEmojiLetters[targetCharIndex] || '';
+                    slot.className = `w-9 h-11 rounded-xl border-2 font-bold text-lg flex items-center justify-center transition ${
+                        fillChar ? 'bg-sky-500 text-white border-sky-600 shadow-md' : 'bg-slate-100 text-slate-400 border-slate-300'
+                    }`;
+                    slot.innerText = fillChar;
+                    slotsContainer.appendChild(slot);
+                    targetCharIndex++;
+                }
+            }
+
+            // Letter bank buttons
+            const bankContainer = document.getElementById('emojiLetterBank');
+            bankContainer.innerHTML = '';
+
+            q.letters.forEach((letChar, idx) => {
+                const btn = document.createElement('button');
+                // Check how many times this letter has been selected
+                const timesUsedInSelection = selectedEmojiLetters.filter((c, i) => i === idx).length; // simple logic
+                btn.className = "w-10 h-10 rounded-xl bg-slate-800 text-white hover:bg-sky-600 font-bold text-sm border border-slate-700 shadow transition transform active:scale-95";
+                btn.innerText = letChar;
+                btn.onclick = () => pickEmojiLetter(letChar);
+                bankContainer.appendChild(btn);
+            });
+        }
+
+        function pickEmojiLetter(letter) {
+            sound.playClick();
+            const q = EMOJI_QUESTIONS[currentEmojiIdx];
+            const totalRequired = q.answer.replace(/\s/g, '').length;
+
+            if (selectedEmojiLetters.length < totalRequired) {
+                selectedEmojiLetters.push(letter);
+                renderEmojiSlotsAndBank();
+            }
+        }
+
+        function clearEmojiSlots() {
+            sound.playClick();
+            selectedEmojiLetters = [];
+            renderEmojiSlotsAndBank();
+        }
+
+        function submitEmojiAnswer() {
+            const q = EMOJI_QUESTIONS[currentEmojiIdx];
+            const userStr = selectedEmojiLetters.join('');
+            const targetStr = q.answer.replace(/\s/g, '');
+
+            if (userStr === targetStr) {
+                sound.playCorrect();
+                currentScore += 30;
+                showDialog("Tepat Sekali! 🎉", `Jawapan betul ialah: "${q.answer}"`, false, () => {
+                    currentEmojiIdx++;
+                    loadEmojiQuestion();
+                });
+            } else {
+                sound.playWrong();
+                showDialog("Cuba Lagi", "Jawapan anda belum tepat. Sila semak semula susunan huruf.");
+            }
+        }
+
+        /* ==========================================================================
+           9. UNSCRAMBLE WORD MODE (ANAGRAM)
+           ========================================================================== */
+        function startUnscrambleMode() {
+            currentMode = 'unscramble';
+            currentUnscrambleIdx = 0;
+            currentScore = 0;
+            showView('unscrambleView');
+            loadUnscrambleQuestion();
+        }
+
+        function loadUnscrambleQuestion() {
+            if (currentUnscrambleIdx >= UNSCRAMBLE_QUESTIONS.length) {
+                sound.playVictory();
+                gameState.xp += currentScore;
+                saveState();
+
+                document.getElementById('resultIcon').className = "fa-solid fa-arrow-down-a-z text-purple-400";
+                document.getElementById('resultTitle').innerText = "Pakar Susun Kata!";
+                document.getElementById('resultSubtitle').innerText = "Anda berjaya menyusun semua perkataan dengan tepat.";
+                document.getElementById('resultScore').innerText = currentScore;
+                document.getElementById('resultAccuracy').innerText = "100%";
+                document.getElementById('resultXP').innerText = currentScore;
+
+                const nextBtn = document.getElementById('nextLevelBtn');
+                nextBtn.innerText = "Main Semula";
+                nextBtn.onclick = () => startUnscrambleMode();
+
+                triggerConfetti();
+                showView('resultView');
+                return;
+            }
+
+            const q = UNSCRAMBLE_QUESTIONS[currentUnscrambleIdx];
+            document.getElementById('wordHintText').innerText = `"${q.hint}"`;
+            document.getElementById('wordScoreText').innerText = currentScore;
+
+            // Prepare pool
+            const letters = q.word.split('');
+            shuffleArray(letters);
+            remainingWordPool = letters.map((l, i) => ({ id: i, letter: l }));
+            placedWordTiles = [];
+
+            renderWordTiles();
+        }
+
+        function renderWordTiles() {
+            // Placed slots
+            const slotContainer = document.getElementById('wordInputSlots');
+            slotContainer.innerHTML = '';
+
+            if (placedWordTiles.length === 0) {
+                slotContainer.innerHTML = `<span class="text-xs text-slate-400 italic">Pilih huruf di bawah untuk mula menyusun...</span>`;
+            } else {
+                placedWordTiles.forEach((tile, idx) => {
+                    const tileEl = document.createElement('button');
+                    tileEl.className = "w-10 h-11 rounded-xl bg-purple-600 text-white font-bold text-lg border-2 border-purple-400 shadow-md hover:bg-rose-500 transition transform active:scale-95 flex items-center justify-center";
+                    tileEl.innerText = tile.letter;
+                    tileEl.onclick = () => unplaceTile(idx);
+                    slotContainer.appendChild(tileEl);
+                });
+            }
+
+            // Pool
+            const poolContainer = document.getElementById('scrambledPool');
+            poolContainer.innerHTML = '';
+
+            remainingWordPool.forEach((tile) => {
+                const tileEl = document.createElement('button');
+                tileEl.className = "w-10 h-11 rounded-xl bg-slate-800 text-white hover:bg-purple-600 font-bold text-lg border border-slate-700 shadow transition transform active:scale-95 flex items-center justify-center";
+                tileEl.innerText = tile.letter;
+                tileEl.onclick = () => placeTile(tile);
+                poolContainer.appendChild(tileEl);
+            });
+        }
+
+        function placeTile(tile) {
+            sound.playClick();
+            remainingWordPool = remainingWordPool.filter(t => t.id !== tile.id);
+            placedWordTiles.push(tile);
+            renderWordTiles();
+        }
+
+        function unplaceTile(idx) {
+            sound.playClick();
+            const tile = placedWordTiles.splice(idx, 1)[0];
+            remainingWordPool.push(tile);
+            renderWordTiles();
+        }
+
+        function resetWordTiles() {
+            sound.playClick();
+            loadUnscrambleQuestion();
+        }
+
+        function submitWordAnswer() {
+            const q = UNSCRAMBLE_QUESTIONS[currentUnscrambleIdx];
+            const formedWord = placedWordTiles.map(t => t.letter).join('');
+
+            if (formedWord === q.word) {
+                sound.playCorrect();
+                currentScore += 25;
+                showDialog("Syabas!", `Kata "${q.word}" adalah tepat!`, false, () => {
+                    currentUnscrambleIdx++;
+                    loadUnscrambleQuestion();
+                });
+            } else {
+                sound.playWrong();
+                showDialog("Cuba Lagi", "Ejaan atau susunan kata masih belum tepat.");
+            }
+        }
+
+        /* ==========================================================================
+           10. GLOSARI / KAMUS MODAL LOGIC
+           ========================================================================== */
+        function openGlosari() {
+            sound.playClick();
+            renderGlosariList();
+            document.getElementById('glosariModal').classList.remove('hidden');
+        }
+
+        function closeGlosari() {
+            sound.playClick();
+            document.getElementById('glosariModal').classList.add('hidden');
+        }
+
+        function renderGlosariList(filterText = '') {
+            const listContainer = document.getElementById('glosariList');
+            listContainer.innerHTML = '';
+
+            // Aggregate all glosari items from questions
+            const items = [];
+            ADVENTURE_LEVELS.forEach(lvl => {
+                lvl.questions.forEach(q => {
+                    if (q.glosari) items.push(q.glosari);
+                });
+            });
+
+            const filtered = items.filter(item => 
+                item.term.toLowerCase().includes(filterText.toLowerCase()) || 
+                item.def.toLowerCase().includes(filterText.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Tiada istilah dijumpai.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "p-3.5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-1 hover:border-emerald-500/40 transition";
+                card.innerHTML = `
+                    <div class="font-bold text-amber-300 text-sm flex items-center justify-between">
+                        <span>${item.term}</span>
+                        <i class="fa-solid fa-bookmark text-emerald-400 text-xs"></i>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">${item.def}</p>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function filterGlosari() {
+            const val = document.getElementById('glosariSearch').value;
+            renderGlosariList(val);
+        }
+
+        /* ==========================================================================
+           11. DIALOG / MODAL HELPERS
+           ========================================================================== */
+        let currentDialogOkCallback = null;
+
+        function showDialog(title, message, showCancel = false, onOk = null) {
+            document.getElementById('dialogTitle').innerText = title;
+            document.getElementById('dialogMessage').innerText = message;
+            currentDialogOkCallback = onOk;
+
+            const btns = document.getElementById('dialogButtons');
+            btns.innerHTML = '';
+
+            if (showCancel) {
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = "px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-xs font-semibold transition";
+                cancelBtn.innerText = "Batal";
+                cancelBtn.onclick = closeDialog;
+                btns.appendChild(cancelBtn);
+            }
+
+            const okBtn = document.createElement('button');
+            okBtn.className = "px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition";
+            okBtn.innerText = "OK";
+            okBtn.onclick = () => {
+                closeDialog();
+                if (currentDialogOkCallback) currentDialogOkCallback();
+            };
+            btns.appendChild(okBtn);
+
+            document.getElementById('dialogModal').classList.remove('hidden');
+        }
+
+        function closeDialog() {
+            document.getElementById('dialogModal').classList.add('hidden');
+        }
+
+        function confirmExit() {
+            showDialog("Keluar Permainan?", "Adakah anda pasti mahu kembali ke menu utama? Skor sesi ini tidak disimpan.", true, () => {
+                if (speedTimer) clearInterval(speedTimer);
+                showView('mainMenu');
+            });
+        }
+
+        /* ==========================================================================
+           12. UTILITIES & CONFETTI
+           ========================================================================== */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Particle Confetti Animation
+        function triggerConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#facc15', '#22c55e', '#38bdf8', '#c084fc', '#f43f5e'];
+
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.7) * 12,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 100
+                });
+            }
+
+            function animateConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+
+                particles.forEach(p => {
+                    if (p.life > 0) {
+                        alive = true;
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.2; // gravity
+                        p.life--;
+
+                        ctx.fillStyle = p.color;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+
+                if (alive) {
+                    requestAnimationFrame(animateConfetti);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            animateConfetti();
+        }
+
+        /* ==========================================================================
+           13. INITIALIZATION ON LOAD
+           ========================================================================== */
+        window.onload = function() {
+            loadState();
+            showView('mainMenu');
+        };
+    </script>
+</body>
+</html>
